@@ -1,7 +1,7 @@
 package byteconv
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -17,9 +17,6 @@ const (
 	EiB  // 1152921504606846976
 )
 
-var invalidByteNumber = errors.New(
-	"byte quantity must be a positive integer with a unit of measurement like M, MB, MiB, G, GiB, or GB")
-
 // BytesToBinarySize returns a human-readable IEC (binary) format string of the form 10MiB, 12.5KiB.
 // History https://en.wikipedia.org/wiki/Mebibyte
 // The following units are available:
@@ -32,49 +29,42 @@ var invalidByteNumber = errors.New(
 //	B: Byte
 // The unit that results in the smallest number greater than or equal to 1 is always chosen.
 func BytesToBinarySize(bytes float64) string {
-	unit := ""
-	var result float64
+
+	if bytes <= 0 {
+		return "0"
+	}
+
+	var	unit string
+	var res float64
 
 	switch {
 	case bytes >= EiB:
 		unit = "EiB"
-		result = bytes / EiB
+		res = bytes / EiB
 	case bytes >= PiB:
 		unit = "PiB"
-		result = bytes / PiB
+		res = bytes / PiB
 	case bytes >= TiB:
 		unit = "TiB"
-		result = bytes / TiB
+		res = bytes / TiB
 	case bytes >= GiB:
 		unit = "GiB"
-		result = bytes / GiB
+		res = bytes / GiB
 	case bytes >= MiB:
 		unit = "MiB"
-		result = bytes / MiB
+		res = bytes / MiB
 	case bytes >= KiB:
 		unit = "KiB"
-		result = bytes / KiB
+		res = bytes / KiB
 	case bytes >= BYTE:
 		unit = "B"
-		result = bytes
-	case bytes == 0:
-		return "0"
+		res = bytes
 	}
 
-	strRes := strconv.FormatFloat(result, 'f', 1, 64)
+	strRes := strconv.FormatFloat(res, 'f', 1, 64)
 	strRes = strings.TrimSuffix(strRes, ".0")
 
 	return strRes + unit
-}
-
-// ToMebibyte parses a string formatted by StringBinaryToBytes as mebibytes.
-func ToMebibyte(s string) (float64, error) {
-	bytes, err := StringBinaryToBytes(s)
-	if err != nil {
-		return 0, err
-	}
-
-	return bytes / MiB, nil
 }
 
 // ToBytes parses a string formatted by ByteSize as bytes. Note binary-prefixed and SI prefixed units both mean a base-2 units
@@ -84,38 +74,78 @@ func ToMebibyte(s string) (float64, error) {
 // TiB = 1024 * G
 // PiB = 1024 * T
 // EiB = 1024 * P
-func StringBinaryToBytes(s string) (float64, error) {
+func StringBinaryToBytes(s string) float64 {
 	s = strings.TrimSpace(s)
 	s = strings.ToUpper(s)
 
 	i := strings.IndexFunc(s, unicode.IsLetter)
 
 	if i == -1 {
-		return 0, invalidByteNumber
+		return 0
 	}
 
 	bytesString, multiple := s[:i], s[i:]
 	bytes, err := strconv.ParseFloat(bytesString, 64)
 	if err != nil || bytes <= 0 {
-		return 0, invalidByteNumber
+		return 0
 	}
 
 	switch multiple {
 	case "EIB":
-		return bytes * EiB, nil
+		return bytes * EiB
 	case "PIB":
-		return bytes * PiB, nil
+		return bytes * PiB
 	case "TIB":
-		return bytes * TiB, nil
+		return bytes * TiB
 	case "GIB":
-		return bytes * GiB, nil
+		return bytes * GiB
 	case "MIB":
-		return bytes * MiB, nil
+		return bytes * MiB
 	case "KIB":
-		return bytes * KiB, nil
+		return bytes * KiB
 	case "B":
-		return bytes, nil
+		return bytes
 	default:
-		return 0, invalidByteNumber
+		return 0
 	}
+}
+
+// BytesSize returns a human-readable in 2 formats: IEC (binary) or SI (decimal)
+// Binary string of the form 10MiB, 12.5KiB
+// Decimal string of the form 10MB, 12.5KB
+// The precision prec controls the number of digits
+//The special precision -1 uses the smallest number of digits
+func BytesSize(bytes float64, format string, prec int) string {
+
+	if bytes <= 0 {
+		return "0"
+	}
+
+	// Default format is decimal: MB, GB
+	value := 1000.0
+	resFormat := ""
+
+	// Binary format: MiB, GiB
+	if format == "binary" {
+		value = 1024.0
+		resFormat = "i"
+	}
+
+	if bytes < value {
+		strRes := strconv.FormatFloat(bytes, 'f', prec, 64)
+		return strings.TrimSuffix(strRes, ".0") + "B"
+	}
+
+	divider, exp := value, 0
+	for n := bytes / value; n >= value; n /= value {
+		divider *= value
+		exp++
+	}
+
+	strRes := strconv.FormatFloat(bytes/divider, 'f', prec, 64)
+	if prec == 0 {
+			strRes = strings.TrimSuffix(strRes, ".0")
+	}
+
+	return strRes + fmt.Sprintf("%c%sB", "KMGTPE"[exp], resFormat)
 }
