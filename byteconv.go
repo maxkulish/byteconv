@@ -15,6 +15,13 @@ const (
 	TiB  // 1099511627776 (exceeds 1 << 32)
 	PiB  // 1125899906842624
 	EiB  // 1152921504606846976
+
+	KB = 1e3
+	MB = 1e6
+	GB = 1e9
+	TB = 1e12
+	PB = 1e15
+	EB = 1e18
 )
 
 // BytesToBinarySize returns a human-readable IEC (binary) format string of the form 10MiB, 12.5KiB.
@@ -67,14 +74,15 @@ func BytesToBinarySize(bytes float64) string {
 	return strRes + unit
 }
 
-// ToBytes parses a string formatted by ByteSize as bytes. Note binary-prefixed and SI prefixed units both mean a base-2 units
+// StringBinaryToBytes parses a string formatted by ByteSize as bytes.
+// Note binary-prefixed and SI prefixed units both mean a base-2 units
 // KiB	= 1024
 // MiB = 1024 * K
 // GiB = 1024 * M
 // TiB = 1024 * G
 // PiB = 1024 * T
 // EiB = 1024 * P
-func StringBinaryToBytes(s string) float64 {
+func StringToBytes(s string) float64 {
 	s = strings.TrimSpace(s)
 	s = strings.ToUpper(s)
 
@@ -93,16 +101,28 @@ func StringBinaryToBytes(s string) float64 {
 	switch multiple {
 	case "EIB":
 		return bytes * EiB
+	case "EB":
+		return bytes * EB
 	case "PIB":
 		return bytes * PiB
+	case "PB":
+		return bytes * PB
 	case "TIB":
 		return bytes * TiB
+	case "TB":
+		return bytes * TB
 	case "GIB":
 		return bytes * GiB
+	case "GB":
+		return bytes * GB
 	case "MIB":
 		return bytes * MiB
+	case "MB":
+		return bytes * MB
 	case "KIB":
 		return bytes * KiB
+	case "KB":
+		return bytes * KB
 	case "B":
 		return bytes
 	default:

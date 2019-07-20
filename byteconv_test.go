@@ -46,10 +46,10 @@ func ExampleBytesToBinarySize() {
 	// 4.8MiB
 }
 
-func TestStringBinaryToBytes(t *testing.T) {
+func TestStringToBytes(t *testing.T) {
 	f := func(s string, resExp float64) {
 		t.Helper()
-		res:= StringBinaryToBytes(s)
+		res:= StringToBytes(s)
 
 		if res != resExp {
 			t.Fatalf("unexpected result for StringBinaryToBytes(%v); got %f; want %f", s, res, resExp)
@@ -60,31 +60,46 @@ func TestStringBinaryToBytes(t *testing.T) {
 	f("-456", 0)
 	f("999B", 999)
 	f("1KiB", 1024)
+	f("1KB", 1000)
 	f("1MiB", 1048576)
+	f("1MB", 1000000)
 	f("003MiB", 3145728)
 	f("-3MiB", 0)
 	f("1GiB", 1073741824)
+	f("12.5GB", 12500000000)
 	f("1TiB", 1099511627776)
 	f("1PiB", 1125899906842624)
 	f("1EiB", 1152921504606846976)
 	f("\n\n\r\t10.18TiB\n\n\r\t", 11193028370759.679688)
+	f("\n\n\r\t10.18TB\n\n\r\t", 10180000000000)
 }
 
-func BenchmarkStringBinaryToBytes(b *testing.B) {
+func BenchmarkStringToBytesTiB(b *testing.B) {
 
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++  {
-		StringBinaryToBytes("\n\n\r\t10.18TiB\n\n\r\t")
+		StringToBytes("\n\n\r\t10.18TiB\n\n\r\t")
 	}
 }
 
-func ExampleStringBinaryToBytes() {
-	fmt.Println(StringBinaryToBytes("55.6MiB"))
-	fmt.Println(StringBinaryToBytes("12TiB"))
+func BenchmarkStringToBytesTB(b *testing.B) {
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++  {
+		StringToBytes("\n\n\r\t10.18TB\n\n\r\t")
+	}
+}
+
+func ExampleStringToBytes() {
+	fmt.Println(StringToBytes("55.6MiB"))
+	fmt.Println(StringToBytes("12TiB"))
+	fmt.Println(StringToBytes("12.5GB"))
 	// Output:
 	// 5.83008256e+07
 	// 1.3194139533312e+13
+	// 1.25e+10
 }
 
 func TestBytesToDecimalSize(t *testing.T) {
