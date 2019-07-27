@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	BYTE = 1 << (10 * iota)
+	BYTE float64 = 1 << (10 * iota)
 	KiB  // 1024
 	MiB  // 1048576
 	GiB  // 1073741824
@@ -16,12 +16,12 @@ const (
 	PiB  // 1125899906842624
 	EiB  // 1152921504606846976
 
-	KB = 1e3
-	MB = 1e6
-	GB = 1e9
-	TB = 1e12
-	PB = 1e15
-	EB = 1e18
+	KB float64 = 1e3  // 1000
+	MB float64 = 1e6  // 1000000
+	GB float64 = 1e9  // 1000000000
+	TB float64 = 1e12 // 100000000000
+	PB float64 = 1e15 // 1000000000000000
+	EB float64 = 1e18 // 1000000000000000000
 )
 
 // BytesToBinarySize returns a human-readable IEC (binary) format string of the form 10MiB, 12.5KiB.
