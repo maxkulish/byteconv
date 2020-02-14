@@ -3,6 +3,28 @@ Converts a size in bytes to a human-readable string in SI (decimal) or IEC (bina
 
 **Note**: Inspired by https://code.cloudfoundry.org/bytefmt
 
+### How to use
+```shell script
+go get -u github.com/maxkulish/byteconv
+```
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/maxkulish/byteconv"
+)
+
+func main() {
+   
+    fmt.Println(byteconv.BytesSize(float64(14016597), "decimal", 2)) 		// 14.02MB
+    fmt.Println(byteconv.BytesSize(float64(14016597), "decimal", -1)) 		// 14.016597MB
+
+}
+
+```
+
+
 #### Examples
 Convert bytes to binary (base-2) format
 ```go
